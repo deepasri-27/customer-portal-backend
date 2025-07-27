@@ -4,23 +4,21 @@ const { parseStringPromise } = require('xml2js');
 
 const router = express.Router();
 
-// SAP delivery endpoint
 const SAP_URL = `${process.env.SAP_BASE_URL}zsrv_customer_delivery?sap-client=${process.env.SAP_CLIENT}`;
 
 router.get('/delivery/:kunnr', async (req, res) => {
   const kunnr = req.params.kunnr;
-
+  
   const xmlBody = `
-   <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-                  xmlns:urn="urn:sap-com:document:sap:rfc:functions">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <urn:ZSD_CUST_DELIVERY_FM> 
-        <KUNNR>${kunnr}</KUNNR>    
+  <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                    xmlns:urn="urn:sap-com:document:sap:rfc:functions">
+    <soapenv:Header/>
+    <soapenv:Body>
+      <urn:ZSD_CUST_DELIVERY_FM>
+        <KUNNR>${kunnr}</KUNNR>
       </urn:ZSD_CUST_DELIVERY_FM>
-   </soapenv:Body>
-</soapenv:Envelope>
-
+    </soapenv:Body>
+  </soapenv:Envelope>
   `;
 
   try {
@@ -35,20 +33,12 @@ router.get('/delivery/:kunnr', async (req, res) => {
       responseType: 'text',
     });
 
-    const result = await parseStringPromise(data);
+    const result = await parseStringPromise(data, { explicitArray: true });
 
-    const envelopeKey = Object.keys(result).find(key => key.includes('Envelope'));
-    if (!envelopeKey) throw new Error("SOAP Envelope not found");
-
-    const bodyKey = Object.keys(result[envelopeKey]).find(key => key.includes('Body'));
-    if (!bodyKey) throw new Error("SOAP Body not found");
-
-    const body = result[envelopeKey][bodyKey][0];
-
-    const responseKey = Object.keys(body).find(key => key.includes('ZSD_CUST_DELIVERY_FMResponse'));
-    if (!responseKey) throw new Error("SAP Delivery Response not found");
-
-    const response = body[responseKey][0];
+    // 👇 Your required parsing structure
+    const envelope = result['soap-env:Envelope'];
+    const body = envelope['soap-env:Body'][0];
+    const response = body['n0:ZSD_CUST_DELIVERY_FMResponse'][0];
     const deliveryItems = response.EV_DELIVERY_RES?.[0]?.item || [];
 
     const deliveryData = deliveryItems.map(item => ({
@@ -63,7 +53,7 @@ router.get('/delivery/:kunnr', async (req, res) => {
       arktx: item.ARKTX?.[0] || '',
       lfimg: item.LFIMG?.[0] || '',
     }));
-
+  
     res.json({
       success: true,
       data: deliveryData

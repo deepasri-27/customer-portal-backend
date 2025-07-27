@@ -5,12 +5,12 @@ require('dotenv').config();
 const sapService = require('./services/login');
 const profileService = require('./services/profile');
 const inquiryRouter = require('./services/inquiry'); 
-// const salesRoutes = require('./services/sales');
- const deliveryRoutes = require('./services/delivery');
-// const agingRoutes = require('./services/aging');
-// const cdmemoRoutes = require('./services/cdmemo');
-// const overallSales = require('./services/overallSales');
-// const invoiceRoute = require('./services/invoice');
+const salesRoutes = require('./services/sales');
+const deliveryRoutes = require('./services/delivery');
+const agingRoutes = require('./services/aging');
+const memoRoutes = require('./services/memo');
+const overallSales = require('./services/overallSales');
+const invoiceRoute = require('./services/invoice');
 // const invoiceDataRoutes = require('./services/invoicedata');
 
 
@@ -37,12 +37,12 @@ app.post('/api/customer-login', async (req, res) => {
 
 app.use('/api',profileService);
 app.use('/api', inquiryRouter);
-// app.use('/api', salesRoutes);
- app.use('/api', deliveryRoutes);
-// app.use('/api', agingRoutes);
-// app.use('/api', cdmemoRoutes);
-// app.use('/api', overallSales);
-// app.use('/api', invoiceRoute);
+app.use('/api', salesRoutes);
+app.use('/api', deliveryRoutes);
+app.use('/api', agingRoutes);
+app.use('/api', memoRoutes);
+app.use('/api', overallSales);
+app.use('/api', invoiceRoute);
 // app.use('/api', invoiceDataRoutes);
 
 app.listen(3001, () => {
