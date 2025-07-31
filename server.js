@@ -11,7 +11,7 @@ const agingRoutes = require('./services/aging');
 const memoRoutes = require('./services/memo');
 const overallSales = require('./services/overallSales');
 const invoiceRoute = require('./services/invoice');
-// const invoiceDataRoutes = require('./services/invoicedata');
+const invoiceDataRoutes = require('./services/invoicepdf');
 
 
 const app = express();
@@ -43,7 +43,7 @@ app.use('/api', agingRoutes);
 app.use('/api', memoRoutes);
 app.use('/api', overallSales);
 app.use('/api', invoiceRoute);
-// app.use('/api', invoiceDataRoutes);
+app.use('/api', invoiceDataRoutes);
 
 app.listen(3001, () => {
   console.log("✅ Server running on http://localhost:3001");
